@@ -10,6 +10,7 @@ serviced install
 ```.sh
 go get github.com/codingeasygo/serviced/serviced
 cp $GOPATH/bin/serviced /usr/bin/serviced
+mkdir /home/serviced/
 cp -f $GOPATH/srv/github.com/codingeasygo/serviced/serviced/serviced.service /etc/systemd/system/
 systemctl enable serviced
 systemctl start serviced
