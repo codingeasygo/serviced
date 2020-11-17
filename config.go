@@ -112,6 +112,14 @@ func (c *Config) Load() (err error) {
 func (c *Config) Save() (err error) {
 	c.init()
 	log.Infof("save config to %v", c.Filename)
+	dir := filepath.Dir(c.Filename)
+	if _, e := os.Stat(dir); os.IsNotExist(e) {
+		err = os.MkdirAll(dir, os.ModePerm)
+		if err != nil {
+			log.Errorf("save config to %v fail with %v", c.Filename, err)
+			return
+		}
+	}
 	err = marshal(c.Filename, c)
 	if err == nil {
 		log.Infof("save config to %v success", c.Filename)
