@@ -80,7 +80,10 @@ func (c *Config) init() {
 func (c *Config) Load() (err error) {
 	c.init()
 	err = unmarshal(c.Filename, c)
-	if err != nil {
+	if os.IsNotExist(err) {
+		err = c.Save()
+		return
+	} else if err != nil {
 		return
 	}
 	for file, enable := range c.Includes {
