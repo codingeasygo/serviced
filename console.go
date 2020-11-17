@@ -2,7 +2,6 @@ package serviced
 
 import (
 	"bufio"
-	"encoding/json"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -10,14 +9,6 @@ import (
 	"path/filepath"
 	"strings"
 )
-
-func toJSON(v interface{}) string {
-	jsonBytes, err := json.Marshal(v)
-	if err == nil {
-		return string(jsonBytes)
-	}
-	return err.Error()
-}
 
 //Console is service manager cli
 type Console struct {

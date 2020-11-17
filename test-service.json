@@ -2,7 +2,7 @@
     "name": "test",
     "services": [
         {
-            "name":"t0",
+            "name": "t0",
             "path": "bash",
             "args": [
                 "-c",
@@ -11,33 +11,36 @@
             ]
         },
         {
-            "name":"t1",
+            "name": "t1",
             "path": "bash",
             "args": [
                 "-c",
                 "echo",
                 "abc"
             ],
-            "stdout":"t1_out.log",
-            "stderr":"t1_err.log"
+            "stdout": "t1_out.log",
+            "stderr": "t1_err.log"
         },
         {
-            "name":"t2",
+            "name": "t2",
             "path": "test",
-            "stdout":"t2.log",
-            "stderr":"t2.log"
+            "stdout": "t2.log",
+            "stderr": "t2.log",
+            "env": [
+                "a=1"
+            ]
         },
         {
-            "name":"t3",
+            "name": "t3",
             "path": "test",
-            "stdout":"xx/t3.log",
-            "stderr":"xx/t3.log"
+            "stdout": "xx/t3.log",
+            "stderr": "xx/t3.log"
         },
         {
-            "name":"t4",
+            "name": "t4",
             "path": "test",
-            "stdout":"t4.log",
-            "stderr":"xx/t4.log"
+            "stdout": "t4.log",
+            "stderr": "xx/t4.log"
         }
     ]
 }

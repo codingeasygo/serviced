@@ -1,0 +1,12 @@
+[Unit]
+Description=serviced service
+After=network.target
+
+[Service]
+User=root
+Restart=always
+WorkingDirectory=/home/serviced/
+ExecStart=/usr/bin/serviced srv /home/serviced/conf/serviced.json
+
+[Install]
+WantedBy=multi-user.target

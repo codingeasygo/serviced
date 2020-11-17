@@ -214,18 +214,29 @@ func (m *Manager) StartService(group *Group, service *Service) (err error) {
 		return
 	}
 	m.locker.Unlock()
-	dir := filepath.Dir(group.Filename)
-	cmdDir := service.Dir
-	if !filepath.IsAbs(cmdDir) {
-		cmdDir = filepath.Join(dir, cmdDir)
+	confDir := filepath.Dir(group.Filename)
+	values := map[string]interface{}{
+		"CONF_DIR": confDir,
 	}
-	cmdPath := service.Path
+	cmdDir := envReplaceEmpty(values, service.Dir, false)
+	if !filepath.IsAbs(cmdDir) {
+		cmdDir = filepath.Join(confDir, cmdDir)
+	}
+	cmdPath := envReplaceEmpty(values, service.Path, false)
 	if !filepath.IsAbs(cmdPath) {
-		cmdPath = filepath.Join(dir, cmdPath)
+		cmdPath = filepath.Join(confDir, cmdPath)
+	}
+	cmdArgs := []string{}
+	for _, arg := range service.Args {
+		cmdArgs = append(cmdArgs, envReplaceEmpty(values, arg, false))
+	}
+	cmdEnv := []string{}
+	for _, env := range service.Env {
+		cmdEnv = append(cmdEnv, envReplaceEmpty(values, env, false))
 	}
 	var stdoutFile, stderrFile *os.File
 	if len(service.Stdout) > 0 {
-		stdout := service.Stdout
+		stdout := envReplaceEmpty(values, service.Stdout, false)
 		if !filepath.IsAbs(stdout) {
 			stdout = filepath.Join(cmdDir, stdout)
 		}
@@ -237,7 +248,7 @@ func (m *Manager) StartService(group *Group, service *Service) (err error) {
 	if len(service.Stderr) > 0 && service.Stderr == service.Stdout {
 		stderrFile = stdoutFile
 	} else if len(service.Stderr) > 0 {
-		stderr := service.Stderr
+		stderr := envReplaceEmpty(values, service.Stderr, false)
 		if !filepath.IsAbs(stderr) {
 			stderr = filepath.Join(cmdDir, stderr)
 		}
@@ -259,8 +270,8 @@ func (m *Manager) StartService(group *Group, service *Service) (err error) {
 	}
 	cmd := exec.Cmd{
 		Path:   cmdPath,
-		Args:   service.Args,
-		Env:    service.Env,
+		Args:   cmdArgs,
+		Env:    cmdEnv,
 		Dir:    cmdDir,
 		Stdout: stdoutFile,
 		Stderr: stderrFile,
