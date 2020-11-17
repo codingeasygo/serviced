@@ -214,11 +214,20 @@ func (m *Manager) StartService(group *Group, service *Service) (err error) {
 		return
 	}
 	m.locker.Unlock()
+	dir := filepath.Dir(group.Filename)
+	cmdDir := service.Dir
+	if !filepath.IsAbs(cmdDir) {
+		cmdDir = filepath.Join(dir, cmdDir)
+	}
+	cmdPath := service.Path
+	if !filepath.IsAbs(cmdPath) {
+		cmdPath = filepath.Join(dir, cmdPath)
+	}
 	var stdoutFile, stderrFile *os.File
 	if len(service.Stdout) > 0 {
 		stdout := service.Stdout
 		if !filepath.IsAbs(stdout) {
-			stdout = filepath.Join(service.Dir, stdout)
+			stdout = filepath.Join(cmdDir, stdout)
 		}
 		stdoutFile, err = os.OpenFile(stdout, os.O_APPEND|os.O_CREATE|os.O_WRONLY, os.ModePerm)
 		if err != nil {
@@ -230,7 +239,7 @@ func (m *Manager) StartService(group *Group, service *Service) (err error) {
 	} else if len(service.Stderr) > 0 {
 		stderr := service.Stderr
 		if !filepath.IsAbs(stderr) {
-			stderr = filepath.Join(service.Dir, stderr)
+			stderr = filepath.Join(cmdDir, stderr)
 		}
 		stderrFile, err = os.OpenFile(stderr, os.O_APPEND|os.O_CREATE|os.O_WRONLY, os.ModePerm)
 		if err != nil {
@@ -240,11 +249,19 @@ func (m *Manager) StartService(group *Group, service *Service) (err error) {
 			return err
 		}
 	}
+	closeStd := func() {
+		if stdoutFile != nil {
+			stdoutFile.Close()
+		}
+		if stderrFile != nil && stderrFile != stdoutFile {
+			stderrFile.Close()
+		}
+	}
 	cmd := exec.Cmd{
-		Path:   service.Path,
+		Path:   cmdPath,
 		Args:   service.Args,
 		Env:    service.Env,
-		Dir:    service.Dir,
+		Dir:    cmdDir,
 		Stdout: stdoutFile,
 		Stderr: stderrFile,
 	}
@@ -265,11 +282,14 @@ func (m *Manager) StartService(group *Group, service *Service) (err error) {
 			running.Err = cmd.Wait()
 			log.Infof("%v/%v is stopped by %v", group.Name, service.Name, running.Err)
 			running.State = StateStopped
+			closeStd()
 			m.locker.Lock()
 			delete(m.running, key)
 			m.locker.Unlock()
 			running.Waiter.Done()
 		}()
+	} else {
+		closeStd()
 	}
 	return
 }
@@ -323,7 +343,7 @@ func (m *Manager) Print(info io.Writer, group string) {
 		if group != "*" && running.Group.Name != group {
 			continue
 		}
-		fmt.Fprintf(info, "%v\t\t%v\t\t%v\t\t%v\t\t%v\n", "running", running.Service.Name, running.Group.Name, running.Service.Path, running.Service.Dir)
+		fmt.Fprintf(info, "%v\t\t%v\t\t%v\t\t%v\t\t%v\n", "running", running.Service.Name, running.Group.Name, running.Service.Path, running.Cmd.Dir)
 	}
 	for _, g := range m.Groups {
 		if group != "*" && g.Name != group {
@@ -333,7 +353,12 @@ func (m *Manager) Print(info io.Writer, group string) {
 			if _, ok := m.running[g.Name+"/"+service.Name]; ok {
 				continue
 			}
-			fmt.Fprintf(info, "%v\t\t%v\t\t%v\t\t%v\t\t%v\n", "stopped", service.Name, g.Name, service.Path, service.Dir)
+			dir := filepath.Dir(g.Filename)
+			cmdDir := service.Dir
+			if !filepath.IsAbs(cmdDir) {
+				cmdDir = filepath.Join(dir, cmdDir)
+			}
+			fmt.Fprintf(info, "%v\t\t%v\t\t%v\t\t%v\t\t%v\n", "stopped", service.Name, g.Name, service.Path, cmdDir)
 		}
 	}
 }
