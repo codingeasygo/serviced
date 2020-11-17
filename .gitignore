@@ -1,0 +1,6 @@
+
+console.serviced.txt
+*.log
+*.exe
+*.exe~
+serviced/serviced.json

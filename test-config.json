@@ -1,0 +1,5 @@
+{
+  "includes": {
+    "test-config.json": 1
+  }
+}
