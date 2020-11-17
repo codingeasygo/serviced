@@ -57,7 +57,7 @@ type myservice struct{}
 func (m *myservice) Execute(args []string, r <-chan svc.ChangeRequest, changes chan<- svc.Status) (ssec bool, errno uint32) {
 	const cmdsAccepted = svc.AcceptStop | svc.AcceptShutdown
 	changes <- svc.Status{State: svc.StartPending}
-	go runService()
+	go runService("")
 	changes <- svc.Status{State: svc.Running, Accepts: cmdsAccepted}
 	for {
 		c := <-r
@@ -118,7 +118,7 @@ func installService(name, desc string) error {
 		s.Close()
 		return fmt.Errorf("service %s already exists", name)
 	}
-	s, err = m.CreateService(name, exepath, mgr.Config{DisplayName: desc}, "is", "auto-started")
+	s, err = m.CreateService(name, exepath, mgr.Config{StartType: mgr.StartAutomatic, DisplayName: desc})
 	if err != nil {
 		return err
 	}

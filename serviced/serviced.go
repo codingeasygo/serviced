@@ -37,7 +37,11 @@ func main() {
 		windowService()
 	default:
 		if (os.Args[1]) == "srv" {
-			runService()
+			conf := ""
+			if len(os.Args) > 2 {
+				conf = os.Args[2]
+			}
+			runService(conf)
 		} else {
 			runConsole()
 		}
@@ -46,12 +50,16 @@ func main() {
 
 var service *serviced.Manager
 
-func runService() {
+func runService(conf string) {
 	log.SetFormatter(NewPlainFormatter())
 	path, _ := exePath()
 	dir := filepath.Dir(path)
 	service = serviced.NewManager()
-	service.Filename = filepath.Join(dir, "serviced.json")
+	if len(conf) > 0 {
+		service.Filename = conf
+	} else {
+		service.Filename = filepath.Join(dir, "serviced.json")
+	}
 	switch runtime.GOOS {
 	case "windows":
 		service.TempDir = dir
