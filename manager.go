@@ -349,12 +349,12 @@ func (m *Manager) StopService(group, name string) (err error) {
 func (m *Manager) Print(info io.Writer, group string) {
 	m.locker.Lock()
 	defer m.locker.Unlock()
-	fmt.Fprintf(info, "%v\t\t%v\t\t%v\t\t%v\t\t%v\n", "STATE", "NAME", "GROUP", "PATH", "DIR")
+	fmt.Fprintf(info, "%v\t\t%v\t\t%v\t\t%v\t\t%v\t\t%v\n", "STATE", "NAME", "GROUP", "PATH", "ARGS", "DIR")
 	for _, running := range m.running {
 		if group != "*" && running.Group.Name != group {
 			continue
 		}
-		fmt.Fprintf(info, "%v\t\t%v\t\t%v\t\t%v\t\t%v\n", "running", running.Service.Name, running.Group.Name, running.Service.Path, running.Cmd.Dir)
+		fmt.Fprintf(info, "%v\t\t%v\t\t%v\t\t%v\t\t%v\t\t%v\n", "running", running.Service.Name, running.Group.Name, running.Service.Path, running.Cmd.Args, running.Cmd.Dir)
 	}
 	for _, g := range m.Groups {
 		if group != "*" && g.Name != group {
@@ -369,7 +369,7 @@ func (m *Manager) Print(info io.Writer, group string) {
 			if !filepath.IsAbs(cmdDir) {
 				cmdDir = filepath.Join(dir, cmdDir)
 			}
-			fmt.Fprintf(info, "%v\t\t%v\t\t%v\t\t%v\t\t%v\n", "stopped", service.Name, g.Name, service.Path, cmdDir)
+			fmt.Fprintf(info, "%v\t\t%v\t\t%v\t\t%v\t\t%v\t\t%v\n", "stopped", service.Name, g.Name, service.Path, service.Args, cmdDir)
 		}
 	}
 }
