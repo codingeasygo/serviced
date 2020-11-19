@@ -270,7 +270,7 @@ func (m *Manager) StartService(group *Group, service *Service) (err error) {
 	}
 	cmd := exec.Cmd{
 		Path:   cmdPath,
-		Args:   cmdArgs,
+		Args:   append([]string{cmdPath}, cmdArgs...),
 		Env:    cmdEnv,
 		Dir:    cmdDir,
 		Stdout: stdoutFile,
@@ -282,6 +282,8 @@ func (m *Manager) StartService(group *Group, service *Service) (err error) {
 		Service: service,
 		Waiter:  sync.WaitGroup{},
 	}
+	log.Infof("%v/%v start by \n\tPath:%v\n\tArgs:%v\n\tEnv:%v\n\tDir:%v\n",
+		group.Name, service.Name, cmd.Path, cmd.Args, cmd.Env, cmd.Dir)
 	err = cmd.Start()
 	if err == nil {
 		running.State = StateRunning
