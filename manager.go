@@ -10,6 +10,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strings"
 	"sync"
 
 	log "github.com/sirupsen/logrus"
@@ -216,7 +217,8 @@ func (m *Manager) StartService(group *Group, service *Service) (err error) {
 	m.locker.Unlock()
 	confDir := filepath.Dir(group.Filename)
 	values := map[string]interface{}{
-		"CONF_DIR": confDir,
+		"CONF_DIR":      confDir,
+		"CONF_DIR_UNIX": strings.ReplaceAll(confDir, "\\", "/"),
 	}
 	cmdDir := envReplaceEmpty(values, service.Dir, false)
 	if !filepath.IsAbs(cmdDir) {
