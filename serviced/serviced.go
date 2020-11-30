@@ -7,6 +7,7 @@ import (
 	"os/signal"
 	"path/filepath"
 	"runtime"
+	"strings"
 	"syscall"
 
 	"github.com/codingeasygo/serviced"
@@ -32,22 +33,19 @@ func usage() {
 }
 
 func main() {
-	switch os.Args[0] {
+	_, name := filepath.Split(os.Args[0])
+	name = strings.TrimPrefix(name, ".exe")
+	switch name {
 	case "serviced-srv":
-		if len(os.Args) > 1 && os.Args[1] == "srv" {
-			conf := ""
-			if len(os.Args) > 2 {
-				conf = os.Args[2]
-			}
-			runService(conf)
-			return
-		}
 		switch runtime.GOOS {
 		case "windows":
 			windowService()
 		default:
-			usage()
-			os.Exit(1)
+			conf := ""
+			if len(os.Args) > 1 {
+				conf = os.Args[1]
+			}
+			runService(conf)
 		}
 	default:
 		runConsole()
