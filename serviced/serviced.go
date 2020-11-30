@@ -32,17 +32,23 @@ func usage() {
 }
 
 func main() {
-	if (os.Args[1]) == "srv" {
-		conf := ""
-		if len(os.Args) > 2 {
-			conf = os.Args[2]
+	switch os.Args[0] {
+	case "serviced-srv":
+		if len(os.Args) > 1 && os.Args[1] == "srv" {
+			conf := ""
+			if len(os.Args) > 2 {
+				conf = os.Args[2]
+			}
+			runService(conf)
+			return
 		}
-		runService(conf)
-		return
-	}
-	switch runtime.GOOS {
-	case "windows":
-		windowService()
+		switch runtime.GOOS {
+		case "windows":
+			windowService()
+		default:
+			usage()
+			os.Exit(1)
+		}
 	default:
 		runConsole()
 	}
