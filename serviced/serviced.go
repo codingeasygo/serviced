@@ -37,6 +37,14 @@ func main() {
 	name = strings.TrimPrefix(name, ".exe")
 	switch name {
 	case "serviced-srv":
+		if len(os.Args) > 1 && os.Args[1] == "srv" {
+			conf := ""
+			if len(os.Args) > 2 {
+				conf = os.Args[2]
+			}
+			runService(conf)
+			return
+		}
 		switch runtime.GOOS {
 		case "windows":
 			windowService()
