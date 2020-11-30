@@ -34,7 +34,7 @@ func usage() {
 
 func main() {
 	_, name := filepath.Split(os.Args[0])
-	name = strings.TrimPrefix(name, ".exe")
+	name = strings.TrimSuffix(name, ".exe")
 	switch name {
 	case "serviced-srv":
 		if len(os.Args) > 1 && os.Args[1] == "srv" {
